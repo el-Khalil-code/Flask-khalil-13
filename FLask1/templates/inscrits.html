@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Inscrits</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Système d'Inscription</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Accueil</a></li>
+                <li><a href="{{ url_for('formulaire') }}"><i class="fas fa-user-plus"></i> S'inscrire</a></li>
+                <li><a href="{{ url_for('inscrits') }}" class="active"><i class="fas fa-users"></i> Liste des inscrits</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="inscrits-card">
+            <h1><i class="fas fa-users"></i> Liste des personnes inscrites</h1>
+
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Rechercher un inscrit...">
+                <button id="searchButton"><i class="fas fa-search"></i></button>
+            </div>
+
+            <div class="table-container">
+                {% if inscrits %}
+                    <table id="inscritsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom complet</th>
+                                <th>Ville</th>
+                                <th>Email</th>
+                                <th>Date d'inscription</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inscrit in inscrits %}
+                                <tr>
+                                    <td><span class="badge">{{ inscrit.id }}</span></td>
+                                    <td><strong>{{ inscrit.nom_complet }}</strong></td>
+                                    <td>
+                                        <span class="location-badge">
+                                            <i class="fas fa-map-marker-alt"></i> {{ inscrit.ville }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:{{ inscrit.email }}" class="email-link">
+                                            <i class="fas fa-envelope"></i> {{ inscrit.email }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="date-badge">
+                                            <i class="fas fa-clock"></i> {{ inscrit.date_inscription }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="no-data">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Aucune inscription n'a été enregistrée pour le moment.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Total des inscrits</h3>
+                    <p>{{ inscrits|length }}</p>
+                </div>
+                {% if inscrits %}
+                    <div class="stat-card">
+                        <i class="fas fa-calendar-alt"></i>
+                        <h3>Dernière inscription</h3>
+                        <p>{{ inscrits[0].date_inscription }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-city"></i>
+                        <h3>Villes</h3>
+                        <p>{{ inscrits|map(attribute='ville')|unique|list|length }}</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="cta-button">
+                <a href="{{ url_for('formulaire') }}" class="btn primary"><i class="fas fa-user-plus"></i> Nouvelle inscription</a>
+                <a href="#" id="exportCsv" class="btn secondary"><i class="fas fa-file-download"></i> Exporter CSV</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Système d'Inscription. Tous droits réservés.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fonctionnalité de recherche
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const table = document.getElementById('inscritsTable');
+
+            if (searchInput && searchButton && table) {
+                const performSearch = function() {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const rows = table.querySelectorAll('tbody tr');
+                    let matchCount = 0;
+
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            row.style.display = '';
+                            row.classList.add('highlight');
+                            setTimeout(() => {
+                                row.classList.remove('highlight');
+                            }, 1500);
+                            matchCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Afficher un message avec le nombre de résultats
+                    if (searchTerm.length > 0) {
+                        let resultMessage = document.getElementById('searchResults');
+                        if (!resultMessage) {
+                            resultMessage = document.createElement('div');
+                            resultMessage.id = 'searchResults';
+                            resultMessage.className = 'search-results';
+                            table.parentNode.insertBefore(resultMessage, table);
+                        }
+
+                        resultMessage.textContent = matchCount > 0 ?
+                            `${matchCount} résultat${matchCount > 1 ? 's' : ''} trouvé${matchCount > 1 ? 's' : ''}` :
+                            'Aucun résultat trouvé';
+                    } else {
+                        const resultMessage = document.getElementById('searchResults');
+                        if (resultMessage) resultMessage.remove();
+                    }
+                };
+
+                searchButton.addEventListener('click', performSearch);
+
+                searchInput.addEventListener('keyup', function(event) {
+                    if (event.key === 'Enter') {
+                        performSearch();
+                    }
+                    // Recherche en temps réel (optionnel)
+                    if (searchInput.value.length > 2 || searchInput.value.length === 0) {
+                        performSearch();
+                    }
+                });
+            }
+
+            // Fonctionnalité d'export CSV
+            const exportButton = document.getElementById('exportCsv');
+            if (exportButton && table) {
+                exportButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Récupérer les en-têtes
+                    const headers = [];
+                    const headerCells = table.querySelectorAll('thead th');
+                    headerCells.forEach(cell => {
+                        headers.push(cell.textContent.trim());
+                    });
+
+                    // Récupérer les données
+                    const rows = [];
+                    const dataCells = table.querySelectorAll('tbody tr');
+                    dataCells.forEach(row => {
+                        const rowData = [];
+                        row.querySelectorAll('td').forEach(cell => {
+                            // Récupérer le texte sans le formatage HTML
+                            rowData.push(cell.textContent.trim());
+                        });
+                        rows.push(rowData);
+                    });
+
+                    // Créer le contenu CSV
+                    let csvContent = headers.join(',') + '\\n';
+                    rows.forEach(row => {
+                        csvContent += row.join(',') + '\\n';
+                    });
+
+                    // Créer un lien de téléchargement
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'inscrits.csv');
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
+        });
+    </script>
+
+    <style>
+        @keyframes highlight {
+            0% { background-color: rgba(52, 152, 219, 0.3); }
+            100% { background-color: rgba(52, 152, 219, 0.1); }
+        }
+
+        .highlight {
+            animation: highlight 1.5s ease-out;
+        }
+
+        .search-results {
+            background-color: var(--light-gray);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+    </style>
+</body>
+</html>

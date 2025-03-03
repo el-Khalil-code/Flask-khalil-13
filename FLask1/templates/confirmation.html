@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation d'Inscription</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Système d'Inscription</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Accueil</a></li>
+                <li><a href="{{ url_for('formulaire') }}"><i class="fas fa-user-plus"></i> S'inscrire</a></li>
+                <li><a href="{{ url_for('inscrits') }}"><i class="fas fa-users"></i> Liste des inscrits</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="confirmation-card">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+
+            <h1>Félicitations !</h1>
+            <p class="success-message">Votre inscription a été enregistrée avec succès.</p>
+
+            <div class="user-info">
+                <h2>Détails de votre inscription</h2>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-user"></i> Nom complet :</span>
+                    <span class="value">{{ nom_complet }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-map-marker-alt"></i> Ville :</span>
+                    <span class="value">{{ ville }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-envelope"></i> Email :</span>
+                    <span class="value">{{ email }}</span>
+                </div>
+            </div>
+
+            <div class="cta-button">
+                <a href="{{ url_for('index') }}" class="btn secondary"><i class="fas fa-home"></i> Retour à l'accueil</a>
+                <a href="{{ url_for('inscrits') }}" class="btn primary"><i class="fas fa-users"></i> Voir tous les inscrits</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Système d'Inscription. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>
